@@ -4,19 +4,14 @@ module.exports = class moduleType {
   }
 
   /**
-   * whether it is AMD define expression
+   * whether it is AMD define call
    * example:
-   * define(['jquery'] , function ($) {
-      return function () {};
-     });
+   * define();
      AST node likes:
-      "expression":{
-        "type":"CallExpression",
-        "callee":{
-          "type":"Identifier",
-          "name":"define"
-        },
-        "arguments":Array[2]
+      "type": "CallExpression",
+      "callee": {
+        "type": "Identifier",
+        "name": "define"
       }
    */
   isDefine(node: any): boolean {
@@ -31,10 +26,10 @@ module.exports = class moduleType {
   }
 
   /**
-   * whether it is commonjs require expression
+   * whether it is commonjs require call
    * 
    * example:
-   * require('a');
+   * require();
    * AST:
    * 
    * {
@@ -42,14 +37,7 @@ module.exports = class moduleType {
         "callee": {
           "type": "Identifier",
           "name": "require"
-        },
-        "arguments": [
-          {
-            "type": "Literal",
-            "value": "a",
-            "raw": "'a'"
-          }
-        ]
+        }
       }
    */
   isRequire(node: any): boolean {
@@ -141,9 +129,9 @@ module.exports = class moduleType {
    */
   isAMDRequire = (node: any): boolean => {
     return this.isRequire(node) &&
-          this.isArray(node.arguments) &&
-          node.arguments[0] &&
-          node.arguments[0].type === 'ArrayExpression';
+      this.isArray(node.arguments) &&
+      node.arguments[0] &&
+      node.arguments[0].type === 'ArrayExpression';
   }
 
 

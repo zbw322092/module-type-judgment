@@ -85,19 +85,14 @@ module.exports = /** @class */ (function () {
         return Object.prototype.toString.call(param) === "[object Array]";
     };
     /**
-     * whether it is AMD define expression
+     * whether it is AMD define call
      * example:
-     * define(['jquery'] , function ($) {
-        return function () {};
-       });
+     * define();
        AST node likes:
-        "expression":{
-          "type":"CallExpression",
-          "callee":{
-            "type":"Identifier",
-            "name":"define"
-          },
-          "arguments":Array[2]
+        "type": "CallExpression",
+        "callee": {
+          "type": "Identifier",
+          "name": "define"
         }
      */
     moduleType.prototype.isDefine = function (node) {
@@ -110,10 +105,10 @@ module.exports = /** @class */ (function () {
             nodeCallee.name === 'define';
     };
     /**
-     * whether it is commonjs require expression
+     * whether it is commonjs require call
      *
      * example:
-     * require('a');
+     * require();
      * AST:
      *
      * {
@@ -121,14 +116,7 @@ module.exports = /** @class */ (function () {
           "callee": {
             "type": "Identifier",
             "name": "require"
-          },
-          "arguments": [
-            {
-              "type": "Literal",
-              "value": "a",
-              "raw": "'a'"
-            }
-          ]
+          }
         }
      */
     moduleType.prototype.isRequire = function (node) {
