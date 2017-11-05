@@ -41,13 +41,49 @@ module.exports = /** @class */ (function () {
         this.isTopLevelRequire = function (node) {
             if (!node ||
                 node.type !== 'Program' ||
-                Object.prototype.toString.call(node.body) !== "[object Array]" ||
+                !_this.isArray(node.body) ||
                 !node.body[0] ||
                 !node.body[0].expression)
                 return false;
             return _this.isRequire(node.body[0].expression);
         };
+        /**
+         * whether it is AMD require expression
+         *
+         * example:
+         * require(['foo'], function(foo) {});
+         * AST:
+         * {
+            "type": "CallExpression",
+            "callee": {
+              "type": "Identifier",
+              "name": "require"
+            },
+            "arguments": [
+              {
+                "type": "ArrayExpression",
+                "elements": [
+                  {
+                    "type": "Literal",
+                    "value": "foo",
+                    "raw": "'foo'"
+                  }
+                ]
+              },
+              Object{...}
+            ]
+          }
+         */
+        this.isAMDRequire = function (node) {
+            return _this.isRequire(node) &&
+                _this.isArray(node.arguments) &&
+                node.arguments[0] &&
+                node.arguments[0].type === 'ArrayExpression';
+        };
     }
+    moduleType.prototype.isArray = function (param) {
+        return Object.prototype.toString.call(param) === "[object Array]";
+    };
     /**
      * whether it is AMD define expression
      * example:

@@ -1,4 +1,7 @@
 module.exports = class moduleType {
+  private isArray(param: any): boolean {
+    return Object.prototype.toString.call(param) === "[object Array]"
+  }
 
   /**
    * whether it is AMD define expression
@@ -101,14 +104,49 @@ module.exports = class moduleType {
     if (
       !node ||
       node.type !== 'Program' ||
-      Object.prototype.toString.call(node.body) !== "[object Array]" ||
+      !this.isArray(node.body) ||
       !node.body[0] ||
       !node.body[0].expression
     ) return false;
-    
+
     return this.isRequire(node.body[0].expression);
   }
-  
+
+  /**
+   * whether it is AMD require expression
+   * 
+   * example:
+   * require(['foo'], function(foo) {});
+   * AST:
+   * {
+      "type": "CallExpression",
+      "callee": {
+        "type": "Identifier",
+        "name": "require"
+      },
+      "arguments": [
+        {
+          "type": "ArrayExpression",
+          "elements": [
+            {
+              "type": "Literal",
+              "value": "foo",
+              "raw": "'foo'"
+            }
+          ]
+        },
+        Object{...}
+      ]
+    }
+   */
+  isAMDRequire = (node: any): boolean => {
+    return this.isRequire(node) &&
+          this.isArray(node.arguments) &&
+          node.arguments[0] &&
+          node.arguments[0].type === 'ArrayExpression';
+  }
+
+
 }
 
 
