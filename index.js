@@ -275,6 +275,129 @@ module.exports = /** @class */ (function () {
                 params[1].type === 'Identifier' && params[1].name === 'exports' &&
                 params[2].type === 'Identifier' && params[2].name === 'module';
         };
+        /**
+         * whether it is ES6 import expression.
+         * Reference:
+         * https://github.com/estree/estree/blob/master/es2015.md#imports
+         *
+         * example 1:
+         * import a from "module-name";
+         * AST:
+         * {
+            "type":"ImportDeclaration",
+            "specifiers":[
+                {
+                  "type": "ImportDefaultSpecifier",
+                  "local": {
+                    "type": "Identifier",
+                    "name": "a"
+                  }
+                }
+              ],
+            "source":{
+              "type":"Literal",
+              "value":"./a",
+              "raw":"'./a'"
+            }
+          }
+      
+          example 2:
+          import {a} from "module-name";
+          AST:
+          {
+            "type": "ImportDeclaration",
+              "specifiers": [
+                {
+                  "type": "ImportSpecifier",
+                  "local": {
+                    "type": "Identifier",
+                    "name": "a"
+                  },
+                  "imported": {
+                    "type": "Identifier",
+                    "name": "a"
+                  }
+                }
+              ],
+            "source": {
+              "type": "Literal",
+              "value": "module-name",
+              "raw": "\"module-name\""
+            }
+          }
+      
+          example 3:
+          import * as name from "module-name";
+          AST:
+          {
+            "type": "ImportDeclaration",
+            "specifiers": [
+                {
+                  "type": "ImportNamespaceSpecifier",
+                  "local": {
+                    "type": "Identifier",
+                    "name": "name"
+                  }
+                }
+              ],
+            "source": {
+              "type": "Literal",
+              "value": "module-name",
+              "raw": "\"module-name\""
+            }
+          }
+         */
+        this.isES6Import = function (node) {
+            if (!node)
+                return false;
+            switch (node.type) {
+                case 'ImportDeclaration':
+                case 'ImportDefaultSpecifier':
+                case 'ImportSpecifier':
+                case 'ImportNamespaceSpecifier':
+                    return true;
+            }
+            return false;
+        };
+        /**
+         * whether it is ES6 export expression.
+         * Reference:
+         * https://github.com/estree/estree/blob/master/es2015.md#exports
+         *
+         * example:
+         * export { a };
+         * AST:
+         * {
+            "type": "ExportNamedDeclaration",
+            "declaration": null,
+            "specifiers": [
+              {
+                "type": "ExportSpecifier",
+                "exported": {
+                  "type": "Identifier",
+                  "name": "a"
+                },
+                "local": {
+                  "type": "Identifier",
+                  "name": "a"
+                }
+              }
+            ],
+            "source": null
+          }
+         */
+        this.isES6Export = function (node) {
+            if (!node)
+                return false;
+            switch (node.type) {
+                case 'ExportNamedDeclaration':
+                case 'ExportSpecifier':
+                case 'ExportDefaultDeclaration':
+                case 'ExportAllDeclaration':
+                    return true;
+            }
+            return false;
+        };
     }
     moduleType.prototype.isArray = function (param) {
         return Object.prototype.toString.call(param) === "[object Array]";
