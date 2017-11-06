@@ -398,6 +398,83 @@ module.exports = /** @class */ (function () {
             }
             return false;
         };
+        /**
+         * whether it is commonJS exports expression.
+         *
+         * example:
+         * module.exports.foo = function() {};
+         * AST:
+         * {
+              "type":"AssignmentExpression",
+              "operator":"=",
+              "left":{
+                "type":"MemberExpression",
+                "computed":false,
+                "object":{
+                  "type":"MemberExpression",
+                  "computed":false,
+                  "object":{
+                    "type":"Identifier",
+                    "name":"module"
+                  },
+                  "property":{
+                    "type":"Identifier",
+                    "name":"exports"
+                  }
+                },
+                "property":{
+                  "type":"Identifier",
+                  "name":"foo"
+                }
+            },
+            "right":Object{...}
+          }
+         */
+        this.isExports = function (node) {
+            if (!node || node.type !== 'AssignmentExpression' || !node.left)
+                return false;
+            // we just care about the left part of AST object.
+            var nodeLeft = node.left;
+            function isExportsIdentifier(obj) {
+                return obj && obj.type === 'Identifier' && obj.name === 'exports';
+            }
+            function isModuleIdentifier(obj) {
+                return obj && obj.type === 'Identifier' && obj.name === 'module';
+            }
+            // eg. module.exports.foo
+            function isModuleExportsAttach() {
+                if (!nodeLeft.object ||
+                    !nodeLeft.property ||
+                    !nodeLeft.object.object ||
+                    !nodeLeft.object.property)
+                    return false;
+                return nodeLeft.type === 'MemberExpression' &&
+                    nodeLeft.object.type === 'MemberExpression' &&
+                    isExportsIdentifier(nodeLeft.object.property) &&
+                    isModuleIdentifier(nodeLeft.object.object);
+            }
+            // eg. module.exports
+            function isModuleExportsAssign() {
+                return nodeLeft.object &&
+                    nodeLeft.property &&
+                    nodeLeft.type === 'MemberExpression' &&
+                    isExportsIdentifier(nodeLeft.property) &&
+                    isModuleIdentifier(nodeLeft.object);
+            }
+            // eg. exports = {}
+            function isExportsAssign() {
+                return isExportsIdentifier(nodeLeft);
+            }
+            // eg. exports.foo
+            function isExportsAttach() {
+                return node.type === 'MemberExpression' &&
+                    isExportsIdentifier(nodeLeft.object);
+            }
+            return isModuleExportsAttach() ||
+                isModuleExportsAssign() ||
+                isExportsAssign() ||
+                isExportsAttach();
+        };
     }
     moduleType.prototype.isArray = function (param) {
         return Object.prototype.toString.call(param) === "[object Array]";
