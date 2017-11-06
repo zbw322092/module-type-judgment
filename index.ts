@@ -503,11 +503,11 @@ module.exports = class moduleType {
     // we just care about the left part of AST object.
     let nodeLeft = node.left;
 
-    function isExportsIdentifier(obj): boolean {
+    function isExportsIdentifier(obj: any): boolean {
       return obj && obj.type === 'Identifier' && obj.name === 'exports';
     }
 
-    function isModuleIdentifier(obj): boolean {
+    function isModuleIdentifier(obj: any): boolean {
       return obj && obj.type === 'Identifier' && obj.name === 'module';
     }
 
